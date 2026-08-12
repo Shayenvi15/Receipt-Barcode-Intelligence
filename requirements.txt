@@ -1,0 +1,15 @@
+numpy
+pandas
+pydantic>=2.7.1
+paddleocr
+paddlepaddle
+langchain
+langchain_openai
+langchain_core
+python-docx # Included due to PaddleOCR dependencies (optional if PaddleOCR is self-contained)
+fastapi
+uvicorn[standard]
+python-multipart # For handling file uploads
+python-magic # Recommended for file type validation
+paddleocr
+paddlepaddle

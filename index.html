@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Barcode & Receipt Scanner | Shambhavi Srivastavv</title>
+
+    <meta
+        name="description"
+        content="A computer vision based Barcode and Receipt Scanner project developed by Shambhavi Srivastavv."
+    >
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #f6f8fb;
+            --card: #ffffff;
+            --text: #18202a;
+            --muted: #687384;
+            --border: #e5e9ef;
+            --accent: #0f766e;
+            --accent-light: #e8f7f4;
+            --dark: #17202b;
+        }
+
+        body {
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Arial,
+                sans-serif;
+
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .container {
+            width: min(1100px, 92%);
+            margin: auto;
+        }
+
+        /* NAVBAR */
+
+        nav {
+            background: rgba(255, 255, 255, 0.96);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-inner {
+            height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .brand span {
+            color: var(--accent);
+        }
+
+        .nav-link {
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .nav-link:hover {
+            color: var(--accent);
+        }
+
+        /* HERO */
+
+        .hero {
+            padding: 90px 0 70px;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 0.8fr;
+            gap: 55px;
+            align-items: center;
+        }
+
+        .eyebrow {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: var(--accent-light);
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            margin-bottom: 18px;
+        }
+
+        h1 {
+            font-size: clamp(38px, 6vw, 64px);
+            line-height: 1.05;
+            letter-spacing: -2px;
+            margin-bottom: 22px;
+        }
+
+        h1 span {
+            color: var(--accent);
+        }
+
+        .hero-text {
+            font-size: 18px;
+            color: var(--muted);
+            max-width: 680px;
+            margin-bottom: 30px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 19px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            transition: 0.2s ease;
+        }
+
+        .button-primary {
+            background: var(--dark);
+            color: white;
+            border-color: var(--dark);
+        }
+
+        .button-primary:hover {
+            transform: translateY(-1px);
+            opacity: 0.92;
+        }
+
+        .button-secondary {
+            background: white;
+        }
+
+        .button-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* PROJECT VISUAL */
+
+        .visual {
+            background: var(--dark);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 18px 45px rgba(23, 32, 43, 0.12);
+        }
+
+        .window-top {
+            display: flex;
+            gap: 7px;
+            margin-bottom: 22px;
+        }
+
+        .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #788391;
+        }
+
+        .scan-box {
+            border: 1px dashed #74808f;
+            border-radius: 12px;
+            padding: 28px 20px;
+            text-align: center;
+            color: #d9e0e7;
+        }
+
+        .scan-icon {
+            font-size: 45px;
+            margin-bottom: 12px;
+        }
+
+        .scan-title {
+            font-weight: 700;
+            font-size: 17px;
+            margin-bottom: 5px;
+        }
+
+        .scan-description {
+            color: #9ba7b5;
+            font-size: 13px;
+        }
+
+        .result {
+            margin-top: 15px;
+            padding: 14px;
+            background: #222d3a;
+            border-radius: 9px;
+            text-align: left;
+        }
+
+        .result-label {
+            font-size: 10px;
+            color: #93a0af;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .result-value {
+            font-size: 14px;
+            margin-top: 4px;
+            color: white;
+        }
+
+        /* SECTION */
+
+        section {
+            padding: 75px 0;
+        }
+
+        .section-heading {
+            max-width: 700px;
+            margin-bottom: 38px;
+        }
+
+        .section-heading h2 {
+            font-size: 32px;
+            letter-spacing: -0.7px;
+            margin-bottom: 10px;
+        }
+
+        .section-heading p {
+            color: var(--muted);
+        }
+
+        /* FEATURE CARDS */
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .feature-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 28px;
+            transition: 0.2s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(23, 32, 43, 0.07);
+        }
+
+        .feature-number {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .feature-card h3 {
+            font-size: 20px;
+            margin-bottom: 9px;
+        }
+
+        .feature-card p {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* WORKFLOW */
+
+        .workflow {
+            background: var(--dark);
+            color: white;
+        }
+
+        .workflow .section-heading p {
+            color: #aeb8c4;
+        }
+
+        .workflow-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .workflow-step {
+            border: 1px solid #35404c;
+            border-radius: 12px;
+            padding: 22px;
+            background: #1c2631;
+        }
+
+        .step-number {
+            color: #7bd4c7;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .workflow-step h3 {
+            font-size: 16px;
+            margin-bottom: 7px;
+        }
+
+        .workflow-step p {
+            color: #aeb8c4;
+            font-size: 13px;
+        }
+
+        /* TECH STACK */
+
+        .tech-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tech {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 14px;
+            font-size: 13px;
+            color: #44505d;
+            font-weight: 600;
+        }
+
+        /* PROJECT STRUCTURE */
+
+        .structure {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .structure-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+        }
+
+        pre {
+            padding: 24px;
+            overflow-x: auto;
+            background: #17202b;
+            color: #d8e0e8;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        /* AUTHOR */
+
+        .author {
+            background: var(--accent-light);
+            border: 1px solid #cdece7;
+            border-radius: 16px;
+            padding: 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .author h2 {
+            font-size: 25px;
+            margin-bottom: 7px;
+        }
+
+        .author p {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .author-name {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        /* FOOTER */
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 30px 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .footer-inner {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 850px) {
+            .hero-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .workflow-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .author {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .hero {
+                padding-top: 60px;
+            }
+
+            h1 {
+                font-size: 42px;
+            }
+
+            .workflow-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .visual {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVIGATION -->
+
+    <nav>
+        <div class="container nav-inner">
+            <div class="brand">
+                <span>Barcode</span> & Receipt Scanner
+            </div>
+
+            <a
+                class="nav-link"
+                href="https://github.com/Shayenvi15"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                GitHub ↗
+            </a>
+        </div>
+    </nav>
+
+
+    <!-- HERO -->
+
+    <header class="hero">
+        <div class="container hero-grid">
+
+            <div>
+                <div class="eyebrow">
+                    COMPUTER VISION PROJECT
+                </div>
+
+                <h1>
+                    Barcode &<br>
+                    <span>Receipt Scanner</span>
+                </h1>
+
+                <p class="hero-text">
+                    A computer vision based application designed to process
+                    barcode and receipt information through dedicated scanning
+                    components and a Python-based API layer.
+                </p>
+
+                <div class="buttons">
+
+                    <a
+                        class="button button-primary"
+                        href="https://github.com/Shayenvi15"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        View GitHub
+                    </a>
+
+                    <a
+                        class="button button-secondary"
+                        href="#features"
+                    >
+                        Explore Project
+                    </a>
+
+                </div>
+            </div>
+
+
+            <!-- VISUAL -->
+
+            <div class="visual">
+
+                <div class="window-top">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+
+                <div class="scan-box">
+
+                    <div class="scan-icon">
+                        ▦
+                    </div>
+
+                    <div class="scan-title">
+                        Scanner Interface
+                    </div>
+
+                    <div class="scan-description">
+                        Barcode & receipt processing
+                    </div>
+
+                    <div class="result">
+
+                        <div class="result-label">
+                            Processing
+                        </div>
+
+                        <div class="result-value">
+                            Image → Detection → Structured Output
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </header>
+
+
+    <!-- FEATURES -->
+
+    <section id="features">
+
+        <div class="container">
+
+            <div class="section-heading">
+
+                <h2>
+                    What the project does
+                </h2>
+
+                <p>
+                    The project combines dedicated barcode and receipt
+                    processing components with an API layer to create a
+                    modular scanning workflow.
+                </p>
+
+            </div>
+
+
+            <div class="features">
+
+                <div class="feature-card">
+
+                    <div class="feature-number">
+                        01 — BARCODE
+                    </div>
+
+                    <h3>
+                        Barcode Scanning
+                    </h3>
+
+                    <p>
+                        Processes barcode information from captured or
+                        provided input and separates barcode-related
+                        processing into a dedicated Python module.
+                    </p>
+
+                </div>
+
+
+                <div class="feature-card">
+
+                    <div class="feature-number">
+                        02 — RECEIPT
+                    </div>
+
+                    <h3>
+                        Receipt Processing
+                    </h3>
+
+                    <p>
+                        Provides a dedicated receipt-scanning component
+                        designed to process receipt information from
+                        image-based input.
+                    </p>
+
+                </div>
+
+
+                <div class="feature-card">
+
+                    <div class="feature-number">
+                        03 — API
+                    </div>
+
+                    <h3>
+                        API Layer
+                    </h3>
+
+                    <p>
+                        Includes a Python API component that provides a
+                        structured interface between the scanning logic
+                        and other application components.
+                    </p>
+
+                </div>
+
+
+                <div class="feature-card">
+
+                    <div class="feature-number">
+                        04 — MODULAR DESIGN
+                    </div>
+
+                    <h3>
+                        Separated Components
+                    </h3>
+
+                    <p>
+                        Barcode scanning, receipt processing, and API
+                        functionality are maintained as separate modules,
+                        making the project easier to extend and maintain.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- WORKFLOW -->
+
+    <section class="workflow">
+
+        <div class="container">
+
+            <div class="section-heading">
+
+                <h2>
+                    Processing Workflow
+                </h2>
+
+                <p>
+                    A modular pipeline connects input images with the
+                    appropriate scanning component and produces structured
+                    application output.
+                </p>
+
+            </div>
+
+
+            <div class="workflow-grid">
+
+                <div class="workflow-step">
+
+                    <div class="step-number">
+                        STEP 01
+                    </div>
+
+                    <h3>
+                        Input
+                    </h3>
+
+                    <p>
+                        Image or scanned visual input is provided to
+                        the application.
+                    </p>
+
+                </div>
+
+
+                <div class="workflow-step">
+
+                    <div class="step-number">
+                        STEP 02
+                    </div>
+
+                    <h3>
+                        Detection
+                    </h3>
+
+                    <p>
+                        The relevant barcode or receipt processing
+                        component is invoked.
+                    </p>
+
+                </div>
+
+
+                <div class="workflow-step">
+
+                    <div class="step-number">
+                        STEP 03
+                    </div>
+
+                    <h3>
+                        Processing
+                    </h3>
+
+                    <p>
+                        The selected scanner processes the supplied
+                        information.
+                    </p>
+
+                </div>
+
+
+                <div class="workflow-step">
+
+                    <div class="step-number">
+                        STEP 04
+                    </div>
+
+                    <h3>
+                        Output
+                    </h3>
+
+                    <p>
+                        Processed information can be returned through
+                        the application's interface/API layer.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- TECHNOLOGY -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-heading">
+
+                <h2>
+                    Technology
+                </h2>
+
+                <p>
+                    Core technologies and project components visible in
+                    the current implementation.
+                </p>
+
+            </div>
+
+
+            <div class="tech-grid">
+
+                <div class="tech">Python</div>
+                <div class="tech">Computer Vision</div>
+                <div class="tech">Barcode Processing</div>
+                <div class="tech">Receipt Processing</div>
+                <div class="tech">API Development</div>
+                <div class="tech">Modular Architecture</div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- PROJECT STRUCTURE -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="section-heading">
+
+                <h2>
+                    Project Structure
+                </h2>
+
+                <p>
+                    The implementation separates the major scanning
+                    responsibilities into dedicated Python modules.
+                </p>
+
+            </div>
+
+
+            <div class="structure">
+
+                <div class="structure-header">
+                    Repository Structure
+                </div>
+
+<pre>
+RECEIPT_SCANNER/
+│
+├── api.py
+├── barcode_scanner.py
+├── receipt_scanner.py
+├── requirements.txt
+│
+└── index.html
+</pre>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- AUTHOR -->
+
+    <section>
+
+        <div class="container">
+
+            <div class="author">
+
+                <div>
+
+                    <h2>
+                        Developed by
+                        <span class="author-name">
+                            Shambhavi Srivastavv
+                        </span>
+                    </h2>
+
+                    <p>
+                        AI Engineer focused on practical AI, computer
+                        vision, intelligent applications, and applied
+                        machine learning systems.
+                    </p>
+
+                </div>
+
+
+                <a
+                    class="button button-primary"
+                    href="https://github.com/Shayenvi15"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    GitHub Profile ↗
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <div class="container footer-inner">
+
+            <div>
+                Barcode & Receipt Scanner
+            </div>
+
+            <div>
+                © <span id="year"></span>
+                Shambhavi Srivastavv
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <script>
+        document.getElementById("year").textContent =
+            new Date().getFullYear();
+    </script>
+
+</body>
+</html>
